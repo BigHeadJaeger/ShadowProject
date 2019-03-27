@@ -1,0 +1,44 @@
+struct DirectionalLight
+{
+	vec4 ambient;
+	vec4 diffuse;
+	vec4 specular;
+	vec3 direction;
+};
+
+struct Material
+{
+	vec4 ambient;
+	vec4 diffuse;
+	vec4 specular;
+	float shiness;
+};
+
+void ComputeDirectionalLight(Material mat,
+	DirectionalLight L,
+	vec3 normal,
+	vec3 toEye,
+	out vec4 ambient,
+	out vec4 diffuse,
+	out vec4 specular)
+{
+	ambient = vec4(0.f, 0.f, 0.f, 0.f);
+	diffuse = vec4(0.f, 0.f, 0.f, 0.f);
+	specular = vec4(0.f, 0.f, 0.f, 0.f);
+
+	vec3 LightV = -L.direction;
+
+	ambient = L.ambient*mat.ambient;
+
+	float diffuseFactor = dot(LightV, normal);
+
+	[flatten]
+	if (diffuseFactor>0.0f)
+	{
+		vec3 v = reflect(-LightV, normal);
+		float specFactor = pow(max(dot(v, toEye), 0.0f), mat.shiness);
+
+		diffuse = diffuseFactor*L.diffuse*mat.diffuse;
+		specular = specFactor*L.specular*mat.specular;
+	}
+}
